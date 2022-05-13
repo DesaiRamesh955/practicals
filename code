@@ -1,0 +1,165 @@
+##node js
+_________________________________________
+const { MongoClient } = require("mongodb");
+
+var url = "mongodb://localhost:27017/student";
+MongoClient.connect(url, (error, database) => {
+  if (error) return;
+  let db = database.db();
+
+  db.collection("studentData")
+    .find({})
+    .toArray()
+    .then((result) => {
+      console.log(result);
+    })
+    .catch(err =>{
+        console.log(err);
+    })
+});
+________________________________________
+
+
+##php code
+__________
+DLL file : https://drive.google.com/file/d/1rKRfnXQZZS-D7y02TSO6rHxceTg5XHwz/view?usp=sharing
+
+
+copy file into xampp/php/ext
+
+open php.ini
+extention=php_mongodb.dll
+save php.ini file
+restart server
+
+
+//config.php
+<?php
+
+use Mongodb\Driver\Manager;
+class DB{
+
+    private $con;
+    private $connection = "mongodb://localhost:27017";
+
+    public function connect(){
+        $this->con = new Manager($this->connection);
+        return $this->con;
+    }
+}
+
+//operation.php
+
+<?php
+
+use Mongodb\Driver\BulkWrite;
+require_once("./config.php");
+
+
+
+
+class insertData{
+
+    private $con;
+    function __construct(){
+        $obj = new DB();
+        $this->con = $obj->connect();
+    }
+
+    public function insert($data,$collection){
+        $bulk = new BulkWrite();
+        $bulk->insert($data);
+
+        $status = $this->con->executeBulkWrite($collection,$bulk);
+        return $status;
+    }
+
+}
+
+
+
+$doc = ["name"=>"John","roll"=>30,"city"=>"New York"];
+
+
+$obj = new insertData();
+$res = $obj->insert($doc,'student.studentData'); // also use insertMany for many records
+
+if($res->getInsertedCount() > 0){
+    echo "Data inserted successfully";
+}else{
+    echo "Data not inserted successfully";
+}
+
+
+//find data
+$collection = $this->con->student->studentData
+$cursor = $collection->find(
+   [
+      'name' => 'John'
+   ],
+   [
+      'limit' => 5,
+      'projection' => [
+            'name' => 1,
+            'borough' => 1,
+            'cuisine' => 1,
+      ],
+   ]
+);
+foreach ($cursor as $student) {
+   var_dump($student);
+};
+
+//update data
+
+$updateResult = $collection->updateOne(
+   [ 'roll' => '30' ],
+   [ '$set' => [ 'name' => 'jack' ]]
+);
+
+echo $updateResult->getModifiedCount();
+
+
+//delete data
+$deleteResult = $collection->deleteOne(['roll' => '30']); //also use deleteMany for many rcords
+echo $deleteResult->getDeletedCount();
+
+
+##python 
+
+import pymongo
+
+client = pymongo.MongoClient("mongodb://localhost:27017/")
+
+db = client["student"]
+
+col = db["studentData"]
+
+#data = {"name":"nikhil","age":21,"marks":90}
+
+#col.insert_one(data)
+query = {"name":{"$regex": "^R" }}
+data = col.find(query)
+
+for item in data:
+    print(item)
+
+new_data={'$set':{"Name":'Ramesh'}}
+col.update_one({'roll':30},new_data)
+
+query={“Roll No”:153}
+collection.delete_one(query)
+
+##methods
+find_one
+update_one
+update_many
+delete_one
+delete_many
+collection.drop()
+
+
+
+
+
+
